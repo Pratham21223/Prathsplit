@@ -1,14 +1,17 @@
 from fastapi import FastAPI
 
-from database import Base, engine, get_db
-from sqlalchemy.orm import Session
-from fastapi import Depends
+from database import Base, engine
 
-# Import models so SQLAlchemy registers them
-from models.user import User
-from schemas.user import UserCreate
+# Import models so SQLAlchemy registers them before create_all
+from models.user import User  # noqa: F401
+
+# Register all routers (groups of related routes)
+from routes.user import router as userRouter
+
+# Creates all tables in the database if they don't already exist
 Base.metadata.create_all(bind=engine)
 
+# FastAPI() is the main application instance
 app = FastAPI(
     title="PrathSplit API",
     version="1.0.0",
@@ -28,17 +31,6 @@ def get_health():
         "status": "healthy"
     }
 
-@app.post("/users")
-def create_user(
-    user : UserCreate,
-    db : Session = Depends(get_db)
-):
-    new_user = User(
-        name = user.name,
-        email = user.email,
-        password = user.password
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+
+# Attach the user router — all its routes become part of the main app
+app.include_router(userRouter)
