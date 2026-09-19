@@ -1,6 +1,7 @@
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel
 
-class Expense(BaseModel,EmailStr):
-    title : str
-    amount : int
-    description : str
+
+class Expense(BaseModel):
+    title: str
+    amount: int
+    description: str
